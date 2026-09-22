@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharma Launch Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#F5F7F9; --surface:#FFFFFF; --surface-2:#EDF2F5; --border:#D8E2E8;
+    --text:#16232E; --text-muted:#55697A; --text-faint:#8296A5;
+    --accent:#0E7C86; --accent-strong:#0A5D65; --accent-soft:#DBEFF0; --accent-soft-text:#0A5D65;
+    --pharma:#9A6400; --pharma-soft:#F5E9D2; --pharma-soft-text:#7A5000;
+    --done:#2F855A; --done-soft:#DDEFE4;
+    --danger:#B4483C; --danger-soft:#F6E1DE;
+    --warn:#9A6400; --warn-soft:#F5E9D2; --warn-soft-text:#7A5000;
+    --tag-pm-bg:#DBEFF0; --tag-pm-text:#0A5D65;
+    --tag-design-bg:#E9E3F7; --tag-design-text:#5B3FA0;
+    --tag-reg-bg:#F5E9D2; --tag-reg-text:#7A5000;
+    --tag-dev-bg:#DCE7F7; --tag-dev-text:#2A4E82;
+    --tag-qa-bg:#F7E3D6; --tag-qa-text:#8A4A1D;
+    --shadow: 0 1px 2px rgba(22,35,46,0.06), 0 6px 20px rgba(22,35,46,0.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E161D; --surface:#152029; --surface-2:#1B2833; --border:#2A3B47;
+      --text:#E8EEF1; --text-muted:#9BAEBC; --text-faint:#6C8090;
+      --accent:#4FD1D9; --accent-strong:#7FE0E6; --accent-soft:#153538; --accent-soft-text:#7FE0E6;
+      --pharma:#E3B15C; --pharma-soft:#3A2E10; --pharma-soft-text:#EFC783;
+      --done:#6FCF97; --done-soft:#12301F;
+      --danger:#E08379; --danger-soft:#3A1D1A;
+      --warn:#E3B15C; --warn-soft:#3A2E10; --warn-soft-text:#EFC783;
+      --tag-pm-bg:#153538; --tag-pm-text:#7FE0E6;
+      --tag-design-bg:#2A2440; --tag-design-text:#C4B3EE;
+      --tag-reg-bg:#3A2E10; --tag-reg-text:#EFC783;
+      --tag-dev-bg:#1A2740; --tag-dev-text:#9DBBE9;
+      --tag-qa-bg:#3A2412; --tag-qa-text:#EEB786;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E161D; --surface:#152029; --surface-2:#1B2833; --border:#2A3B47;
+    --text:#E8EEF1; --text-muted:#9BAEBC; --text-faint:#6C8090;
+    --accent:#4FD1D9; --accent-strong:#7FE0E6; --accent-soft:#153538; --accent-soft-text:#7FE0E6;
+    --pharma:#E3B15C; --pharma-soft:#3A2E10; --pharma-soft-text:#EFC783;
+    --done:#6FCF97; --done-soft:#12301F;
+    --danger:#E08379; --danger-soft:#3A1D1A;
+    --warn:#E3B15C; --warn-soft:#3A2E10; --warn-soft-text:#EFC783;
+    --tag-pm-bg:#153538; --tag-pm-text:#7FE0E6;
+    --tag-design-bg:#2A2440; --tag-design-text:#C4B3EE;
+    --tag-reg-bg:#3A2E10; --tag-reg-text:#EFC783;
+    --tag-dev-bg:#1A2740; --tag-dev-text:#9DBBE9;
+    --tag-qa-bg:#3A2412; --tag-qa-text:#EEB786;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{ background:var(--bg); }
+  body{
+    margin:0; color:var(--text);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    padding: 28px 16px 80px;
+  }
+  .wrap{ max-width: 880px; margin: 0 auto; }
+  .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+
+  header.top{ margin-bottom: 22px; }
+  h1{
+    font-family:'Newsreader', Georgia, serif; font-weight:600; font-style:italic;
+    font-size: clamp(28px,5vw,38px); line-height:1.1; margin: 0 0 6px; letter-spacing:-0.01em;
+  }
+  .tagline{ color:var(--text-muted); font-size:15px; max-width:60ch; margin:0 0 16px; }
+  .local-note{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-faint);
+    font-family:'IBM Plex Mono',monospace; margin-bottom:14px;
+  }
+  .local-note .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+
+  .context-row{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:10px 14px; box-shadow:var(--shadow);
+  }
+  .context-row label{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
+  .context-row input{
+    flex:1; min-width:180px; border:none; background:transparent; color:var(--text);
+    font-family:'IBM Plex Mono', monospace; font-size:14px; padding:4px 2px; outline:none;
+  }
+  .context-row input:focus{ background:var(--accent-soft); border-radius:5px; }
+  .save-dot{ width:7px; height:7px; border-radius:50%; background:var(--border); transition:background .3s; flex-shrink:0; }
+  .save-dot.on{ background:var(--done); }
+
+  .toolbar{ display:flex; gap:10px; margin: 22px 0 6px; flex-wrap:wrap; }
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer;
+    border:1px solid var(--border); background:var(--surface); color:var(--text-muted);
+    padding:7px 12px; border-radius:8px; transition:.15s;
+  }
+  .btn:hover{ color:var(--text); border-color:var(--accent); }
+
+  section.block{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:18px 20px 20px; margin: 18px 0; box-shadow:var(--shadow);
+  }
+  .block h2{ font-size:15px; margin:0 0 4px; font-weight:700; }
+  .block .sub{ color:var(--text-muted); font-size:13px; margin:0 0 14px; }
+
+  .legend-grid{ display:flex; flex-wrap:wrap; gap:8px 10px; margin-bottom: 14px;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500; padding:4px 10px;
+    border-radius:999px; display:inline-flex; align-items:center; gap:6px;
+  }
+  .chip.pm{ background:var(--tag-pm-bg); color:var(--tag-pm-text); }
+  .chip.design{ background:var(--tag-design-bg); color:var(--tag-design-text); }
+  .chip.reg{ background:var(--tag-reg-bg); color:var(--tag-reg-text); }
+  .chip.dev{ background:var(--tag-dev-bg); color:var(--tag-dev-text); }
+  .chip.qa{ background:var(--tag-qa-bg); color:var(--tag-qa-text); }
+  .chip.removable{ padding-right:6px; }
+  .chip .x{ cursor:pointer; opacity:.6; font-weight:700; padding:0 2px; }
+  .chip .x:hover{ opacity:1; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:7px; }
+
+  .glossary dl{ display:grid; grid-template-columns: max-content 1fr; gap:6px 14px; margin:0; }
+  .glossary dt{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--accent-strong); white-space:nowrap; }
+  .glossary dd{ margin:0; font-size:13.5px; color:var(--text-muted); }
+
+  ul.ceremony-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  ul.ceremony-list li{ display:flex; align-items:flex-start; gap:8px; }
+  ul.ceremony-list li .dash{ color:var(--accent); font-family:'IBM Plex Mono',monospace; padding-top:2px; }
+  .edit{ outline:none; border-bottom:1px dashed transparent; flex:1; padding:1px 2px; border-radius:3px; }
+  .edit:hover{ background:var(--surface-2); }
+  .edit:focus{ background:var(--accent-soft); border-bottom-color:var(--accent); }
+  .del{
+    border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:15px;
+    line-height:1; padding:2px 5px; border-radius:5px; flex-shrink:0;
+  }
+  .del:hover{ color:var(--danger); background:var(--danger-soft); }
+  .add-row{
+    border:none; background:none; color:var(--accent-strong); font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px; font-weight:600; cursor:pointer; padding:6px 2px; margin-top:6px; text-align:left;
+  }
+  .add-row:hover{ text-decoration:underline; }
+
+  /* flow overview diagram */
+  .diagram{ margin:0; }
+  .diagram svg{ max-width:100%; height:auto; display:block; color:var(--text-faint); }
+  .diagram figcaption{ font-size:12.5px; color:var(--text-muted); margin-top:10px; line-height:1.5; }
+  .flow-node{ cursor:pointer; }
+  .flow-node .nodebg{ transition: stroke .15s, filter .15s; }
+  .flow-node:hover .nodebg, .flow-node:focus-visible .nodebg{ stroke:var(--accent); stroke-width:2.5; }
+  .flow-node:focus-visible{ outline:none; }
+  .flow-node:hover, .flow-node:focus-visible{ transform: translateY(-2px); }
+
+  /* flow list */
+  .flow{ display:flex; flex-direction:column; }
+  .phase-row{ display:flex; gap:14px; position:relative; }
+  .rail{ width:40px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; }
+  .rail .dot{
+    width:34px; height:34px; border-radius:50%; background:var(--surface); border:2px solid var(--accent);
+    color:var(--accent-strong); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; z-index:1;
+  }
+  .rail .line{ width:2px; flex:1; background:var(--border); margin: 2px 0; }
+  .phase-row:last-child .rail .line{ display:none; }
+  .pharma-flag .rail .dot{ border-color:var(--pharma); color:var(--pharma-soft-text); }
+
+  details.card{
+    flex:1; background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    margin-bottom:14px; box-shadow:var(--shadow); overflow:hidden; transition: box-shadow .3s, border-color .3s;
+  }
+  details.card.flash{ border-color:var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
+  details.card > summary{
+    list-style:none; cursor:pointer; padding:12px 16px; display:flex; align-items:center; gap:10px;
+    flex-wrap:wrap;
+  }
+  details.card > summary::-webkit-details-marker{ display:none; }
+  summary .title{ font-weight:700; font-size:15px; flex:1; min-width:140px; }
+  summary .summary-line{ width:100%; color:var(--text-muted); font-size:13px; margin-top:2px; }
+  summary .chev{ color:var(--text-faint); transition:transform .18s; font-size:12px; }
+  details[open] summary .chev{ transform:rotate(90deg); }
+  .pharma-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:.03em;
+    background:var(--pharma-soft); color:var(--pharma-soft-text); padding:2px 7px; border-radius:5px;
+  }
+
+  .card-body{ padding: 4px 16px 18px; border-top:1px solid var(--border); }
+  .card-body h3{
+    font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-faint);
+    font-family:'IBM Plex Mono',monospace; margin: 16px 0 8px; display:flex; align-items:center; gap:6px;
+  }
+  ol.steps{ margin:0; padding-left:0; list-style:none; counter-reset:step; display:flex; flex-direction:column; gap:7px;}
+  ol.steps li{ counter-increment:step; display:flex; gap:9px; align-items:flex-start; font-size:14px; line-height:1.5;}
+  ol.steps li::before{
+    content: counter(step); font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700;
+    color:var(--accent-strong); background:var(--accent-soft); min-width:20px; height:20px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
+  }
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px;}
+  ul.bullets li{ display:flex; gap:9px; align-items:flex-start; font-size:14px; line-height:1.5;}
+  ul.bullets li .mark{ flex-shrink:0; margin-top:2px; }
+  ul.bullets.need li .mark{ color:var(--accent); }
+  ul.bullets.watch li .mark{ color:var(--warn); }
+  ul.bullets.watch li{ background:var(--warn-soft); padding:7px 9px; border-radius:8px; }
+  ul.bullets.watch li .edit{ color:var(--warn-soft-text); }
+  ul.questions{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px;}
+  ul.questions li{ display:flex; gap:9px; align-items:flex-start; font-size:14px; line-height:1.5;}
+  ul.questions li input[type=checkbox]{ margin-top:4px; width:15px; height:15px; accent-color:var(--done); flex-shrink:0; cursor:pointer;}
+  ul.questions li.done .edit{ color:var(--text-faint); text-decoration:line-through; text-decoration-color:var(--text-faint); }
+  textarea.notes{
+    width:100%; min-height:56px; resize:vertical; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:8px; padding:8px 10px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; color:var(--text);
+  }
+  .card-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; }
+  .reset-btn{ font-size:11.5px; color:var(--text-faint); background:none; border:none; cursor:pointer; font-family:'IBM Plex Mono',monospace;}
+  .reset-btn:hover{ color:var(--danger); }
+
+  footer{ text-align:center; color:var(--text-faint); font-size:12px; margin-top:34px; }
+  footer button{ font: inherit; color:inherit; background:none; border:none; text-decoration:underline; cursor:pointer; padding:0; }
+
+  @media (max-width: 560px){
+    .rail{ width:30px; }
+    .rail .dot{ width:28px; height:28px; font-size:11.5px; }
+    body{ padding:20px 12px 70px; }
+    .glossary dl{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Pharma Launch Flow</h1>
+    <p class="tagline">A working flow chart for pharma website builds — what happens in each phase, who's needed, what has to be ready, the watch-outs, and roughly how long it takes. Click any phase in the diagram (or the checklist below) to open it up.</p>
+    <p class="local-note"><span class="dot"></span>Runs entirely in your browser — edits save to this device only, so they won't sync across teammates unless this gets wired up to a shared backend.</p>
+    <div class="context-row">
+      <label for="ctx">Applying to</label>
+      <input id="ctx" class="mono" placeholder="e.g., Project code / brand / site name…" />
+      <span id="ctxDot" class="save-dot"></span>
+    </div>
+  </header>
+
+  <section class="block">
+    <h2>Roles</h2>
+    <p class="sub">Color coding used throughout — including the "who's needed" list on every phase below.</p>
+    <div class="legend-grid">
+      <span class="chip pm">PM-led</span>
+      <span class="chip design">Design</span>
+      <span class="chip reg">Regulatory / MLR</span>
+      <span class="chip dev">Dev</span>
+      <span class="chip qa">QA</span>
+    </div>
+    <h2>Cadence &amp; ceremonies</h2>
+    <p class="sub">Runs underneath every phase below — edit to match how this project actually runs.</p>
+    <ul class="ceremony-list" id="ceremonyList"></ul>
+    <button class="add-row" id="addCeremony">+ add a ceremony</button>
+    <h3 style="margin-top:16px;">Notes</h3>
+    <textarea class="notes" id="cadenceNotes" placeholder="Anything project-specific about how this team is running meetings…"></textarea>
+  </section>
+
+  <section class="block flow-overview">
+    <h2>How this flows</h2>
+    <p class="sub">The same nine phases below, drawn as a sequence — including the second, separate MLR round on the live build and the 2253/AFD filing — plus where rework loops back in. Click any box to jump straight to its full checklist. Durations are business-day estimates from a comparable project's actual schedule; scope, review speed, and MLR turnaround will move them.</p>
+    <figure class="diagram">
+      <svg viewBox="0 0 900 420" role="img" aria-label="Flow diagram in three rows. Row one: Kickoff leads to Wireframes and Copy, then Design, then MLR Review of the design. Row two, continuing downward: Development, then QA, then a second MLR Review of staging screenshots. Row three, continuing downward: 2253/AFD Submission, then Pre-Launch and Launch, with a callout that the total timeline is about sixteen to seventeen weeks from kickoff to launch. Dashed loops run from MLR Review of the design back to Design, from QA back to Development, and from MLR Review of staging back to Development, each labeled with the reason for the rework. Every phase box is clickable and opens its details below.">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- main flow arrows -->
+        <g stroke="currentColor" stroke-width="2" fill="none" marker-end="url(#arrow)">
+          <line x1="200" y1="76" x2="246" y2="76"/>
+          <line x1="420" y1="76" x2="466" y2="76"/>
+          <line x1="640" y1="76" x2="686" y2="76"/>
+          <line x1="775" y1="108" x2="775" y2="186"/>
+          <line x1="690" y1="222" x2="644" y2="222"/>
+          <line x1="470" y1="222" x2="424" y2="222"/>
+          <line x1="335" y1="254" x2="335" y2="332"/>
+          <line x1="420" y1="368" x2="466" y2="368"/>
+        </g>
+
+        <!-- feedback loops -->
+        <g stroke="currentColor" stroke-width="1.6" fill="none" stroke-dasharray="5 4" opacity="0.6" marker-end="url(#arrow)">
+          <path d="M775,44 C775,8 555,8 555,40"/>
+          <path d="M600,190 C600,150 730,150 730,190"/>
+          <path d="M390,254 C390,300 775,300 775,254"/>
+        </g>
+        <g font-family="'IBM Plex Mono',monospace" font-size="10.5" text-anchor="middle" opacity="0.75" style="fill:var(--text-muted)">
+          <text x="665" y="16">if MLR requests changes</text>
+          <text x="665" y="146">if QA finds issues</text>
+          <text x="582" y="316">if MLR requests build changes</text>
+        </g>
+
+        <g font-family="'IBM Plex Sans',sans-serif">
+          <!-- Row 1 -->
+          <g class="flow-node" data-phase="kickoff" tabindex="0" role="button" aria-label="Kickoff and Admin, about 1 week. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="30" y="44" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="30" y="44" width="5" height="64" rx="2" style="fill:var(--tag-pm-text)"/>
+            <text x="115" y="70" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">Kickoff &amp; Admin</text>
+            <text x="115" y="88" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~1 week</text>
+          </g>
+
+          <g class="flow-node" data-phase="discovery" tabindex="0" role="button" aria-label="Wireframes and Copy, about 4 to 5 weeks. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="250" y="44" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="250" y="44" width="5" height="64" rx="2" style="fill:var(--tag-pm-text)"/>
+            <text x="335" y="70" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">Wireframes &amp; Copy</text>
+            <text x="335" y="88" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~4–5 weeks</text>
+          </g>
+
+          <g class="flow-node" data-phase="design" tabindex="0" role="button" aria-label="Design in Figma, about 2 weeks. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="470" y="44" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="470" y="44" width="5" height="64" rx="2" style="fill:var(--tag-design-text)"/>
+            <text x="555" y="70" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">Design (Figma)</text>
+            <text x="555" y="88" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~2 weeks</text>
+          </g>
+
+          <g class="flow-node" data-phase="mlrDesign" tabindex="0" role="button" aria-label="MLR Review of design flats, about 2 weeks. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="690" y="44" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="690" y="44" width="5" height="64" rx="2" style="fill:var(--tag-reg-text)"/>
+            <text x="775" y="70" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">MLR Review</text>
+            <text x="775" y="84" text-anchor="middle" font-size="9.5" style="fill:var(--text-muted)">(design flats)</text>
+            <text x="775" y="98" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~2 weeks</text>
+          </g>
+
+          <!-- Row 2 -->
+          <g class="flow-node" data-phase="development" tabindex="0" role="button" aria-label="Development, about 2 to 3 weeks. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="690" y="190" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="690" y="190" width="5" height="64" rx="2" style="fill:var(--tag-dev-text)"/>
+            <text x="775" y="216" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">Development</text>
+            <text x="775" y="234" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~2–3 weeks</text>
+          </g>
+
+          <g class="flow-node" data-phase="qa" tabindex="0" role="button" aria-label="QA, about 1 to 2 weeks. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="470" y="190" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="470" y="190" width="5" height="64" rx="2" style="fill:var(--tag-qa-text)"/>
+            <text x="555" y="216" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">QA</text>
+            <text x="555" y="234" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~1–2 weeks</text>
+          </g>
+
+          <g class="flow-node" data-phase="mlrStaging" tabindex="0" role="button" aria-label="MLR Review of staging screenshots, about 1 week. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="250" y="190" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="250" y="190" width="5" height="64" rx="2" style="fill:var(--tag-reg-text)"/>
+            <text x="335" y="210" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">MLR Review</text>
+            <text x="335" y="224" text-anchor="middle" font-size="9.5" style="fill:var(--text-muted)">(staging screenshots)</text>
+            <text x="335" y="238" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~1 week</text>
+          </g>
+
+          <!-- Row 3 -->
+          <g class="flow-node" data-phase="submission2253" tabindex="0" role="button" aria-label="2253/AFD Submission, about 1 week. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="250" y="336" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="250" y="336" width="5" height="64" rx="2" style="fill:var(--tag-reg-text)"/>
+            <text x="335" y="362" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">2253/AFD Submission</text>
+            <text x="335" y="380" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~1 week</text>
+          </g>
+
+          <g class="flow-node" data-phase="launch" tabindex="0" role="button" aria-label="Pre-Launch and Launch, about 1 week. Activate for details.">
+            <title>Click for who's needed, prerequisites, and watch-outs</title>
+            <rect class="nodebg" x="470" y="336" width="170" height="64" rx="10" style="fill:var(--surface);stroke:var(--border)" stroke-width="1.5"/>
+            <rect x="470" y="336" width="5" height="64" rx="2" style="fill:var(--tag-pm-text)"/>
+            <text x="555" y="362" text-anchor="middle" font-weight="700" font-size="13" style="fill:var(--text)">Pre-Launch &amp; Launch</text>
+            <text x="555" y="380" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">~1 week</text>
+          </g>
+
+          <!-- total timeline callout (not clickable) -->
+          <rect x="690" y="336" width="170" height="64" rx="10" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="775" y="360" text-anchor="middle" font-weight="700" font-size="14" style="fill:var(--accent-soft-text)">~16–17 wks</text>
+          <text x="775" y="378" text-anchor="middle" font-size="10.5" style="fill:var(--accent-soft-text)">kickoff → launch</text>
+        </g>
+      </svg>
+      <figcaption>MLR reviews the site twice: once on design flats before development, and again on screenshots of the actual staging build once it's coded. The 2253/AFD filing follows the second MLR approval and has to clear before the launch date can be locked.</figcaption>
+    </figure>
+  </section>
+
+  <div class="toolbar">
+    <button class="btn" id="expandAll">Expand all</button>
+    <button class="btn" id="collapseAll">Collapse all</button>
+  </div>
+
+  <div class="flow" id="flow"></div>
+
+  <section class="block glossary">
+    <h2>Glossary</h2>
+    <p class="sub">Terms that show up in this process and aren't always obvious to people new to pharma work.</p>
+    <dl>
+      <dt>Flats</dt><dd>Static, non-interactive design comps submitted for review — as opposed to a working build.</dd>
+      <dt>IR</dt><dd>Internal Review — the round where the internal team reviews work before it goes to the client.</dd>
+      <dt>Manuwires</dt><dd>Wireframes annotated with near-final copy, used to align structure and content together instead of separately.</dd>
+      <dt>MLR</dt><dd>Medical, Legal, Regulatory review — the required approval round for pharma promotional material.</dd>
+      <dt>Route to clean</dt><dd>Incorporating a round of feedback and producing a clean, mark-up-free version.</dd>
+      <dt>2253 / AFD</dt><dd>FDA Form 2253, submitted to the Office of Prescription Drug Promotion at first dissemination of new promotional material.</dd>
+      <dt>Fair balance / ISI</dt><dd>The risk information that must accompany promotional claims for a prescription product.</dd>
+      <dt>Hard lock</dt><dd>A cutoff after which no further content or code changes are allowed before launch.</dd>
+    </dl>
+  </section>
+
+  <footer>A local reference tool — edits save to this browser only. <button id="resetAllBtn">Reset all edits to the template</button></footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "pharmaLaunchFlow.v1";
+
+  var DEFAULT_CONTEXT = "";
+
+  var DEFAULT_CEREMONIES = [
+    "Internal kickoff — once, at project start — full internal team — align on scope, roles, timeline, and MLR requirements",
+    "Design/dev status scrum — weekly, 2x/week once active build starts — PM + the discipline in flight, Creative Director as needed — track progress, unblock, keep the timeline honest",
+    "Daily standup — daily during active development and QA weeks — PM, developer, QA — quick blocker check against the deadline",
+    "MLR turnaround sync — as needed, every MLR round — PM, design/dev lead, regulatory contact — coordinate design and staging updates together so nothing drifts",
+    "Pre-launch check-in — daily in the week before launch — PM, developer, QA — confirm checklist status and hard-lock timing",
+    "Client status — per SOW cadence (typically weekly) — PM + account team — report progress, surface decisions the client owes us"
+  ];
+
+  var PHASES = [
+    { id:"kickoff", num:"01", title:"Kickoff & Admin", owner:"pm", ownerLabel:"PM-led", pharma:false, duration:"~1 week",
+      summary:"Lock scope, budget, and the full team before creative work starts.",
+      who:["PM","Account Lead","Creative Director","Developer","Designer"],
+      whatNeeded:[
+        "Signed SOW and budget",
+        "A staffed roster for every discipline — design, dev, copy, QA, and a regulatory/MLR contact",
+        "Any known claims, ISI, or fair-balance requirements documented up front"
+      ],
+      steps:[
+        "Finalize SOW, budget, and high-level timeline; confirm resourcing across design, dev, copy, and QA",
+        "Draft and circulate the creative/project brief",
+        "Hold internal kickoff — align the team on scope, roles, and key dates before the client call",
+        "Hold client kickoff — confirm objectives, brand guardrails, and any known MLR/regulatory constraints"
+      ],
+      watchouts:[
+        "Skipping the internal kickoff and going straight to the client leaves the team unaligned on scope and roles",
+        "Claims, ISI, and fair-balance requirements that aren't documented at kickoff tend to surface later as rework"
+      ],
+      questions:[
+        "Is the SOW and budget approved before any billable work starts?",
+        "Do we have a named person for every role — design, dev, copy, QA, and a regulatory/MLR contact?",
+        "Are known claims, ISI, and fair balance requirements documented in the brief, not discovered later?",
+        "Is the internal kickoff scheduled before the client kickoff, not after?"
+      ]},
+    { id:"discovery", num:"02", title:"Wireframes & Copy", owner:"pm", ownerLabel:"PM-led", pharma:false, duration:"~4–5 weeks",
+      summary:"Get structure and words moving in parallel — copy shouldn't wait for design to ask for it.",
+      who:["PM","UX/UI Designer","Copywriter","Proofreader"],
+      whatNeeded:[
+        "Approved brief and any audience-specific messaging guidance",
+        "A content inventory for every audience track in scope"
+      ],
+      steps:[
+        "UX designer builds wireframes for the site — every audience track in scope, if there's more than one",
+        "Hold internal wireframe connect call; route revisions",
+        "Kick off copy development for each audience track in parallel with wireframes, not after",
+        "Schedule copy in phased reviews — outline, draft, near-final — instead of one delivery at the very end",
+        "Build a proofreading pass into the schedule before copy locks into layout",
+        "Present wireframes to the client; incorporate feedback"
+      ],
+      watchouts:[
+        "Copy delivered all at once at the end instead of in phased reviews",
+        "Proofreading treated as optional and skipped under time pressure",
+        "Wireframes signed off without checking ISI/fair-balance placement for every audience"
+      ],
+      questions:[
+        "Is copy being reviewed in phases, or is it all landing on one deadline at the end?",
+        "Is proofreading scheduled as its own step, or does it get skipped under time pressure?",
+        "Does the wireframe account for every audience's journey, including ISI/fair balance placement?",
+        "Has anything in the wireframes already raised an MLR flag worth surfacing early?"
+      ]},
+    { id:"design", num:"03", title:"Design (Figma)", owner:"design", ownerLabel:"Design", pharma:false, duration:"~2 weeks",
+      summary:"Design in Figma, starting from components so every page stays consistent.",
+      who:["UI/UX Designer","Creative Director","PM"],
+      whatNeeded:[
+        "Approved wireframes",
+        "Full asset inventory — photography, iconography, brand assets, data/charts",
+        "A decision on whether animation is in scope"
+      ],
+      steps:[
+        "UI/UX designer builds core design-system components first (type, color, buttons, cards) before full page layouts",
+        "Confirm the designer has every asset needed — photography, iconography, brand assets, data/charts; PM sources anything missing or briefs in additional creative support",
+        "Decide whether animation is needed; if it risks page speed, plan to build it in development instead of baking it into static comps",
+        "PM stays embedded in day-to-day design collaboration, with Creative Director oversight on direction — not just checkpoint reviews",
+        "Design lead reviews mobile/responsive views and flags anything that won't translate before it goes to the client",
+        "Internal review, revisions, route to clean",
+        "Present to client; incorporate client feedback; fact-check",
+        "Milestone: client delivery"
+      ],
+      watchouts:[
+        "Full pages get built before components are approved, which means rework across every page later",
+        "Mobile isn't reviewed until the client already has the file in hand",
+        "Animation gets baked into comps without checking the page-speed impact first"
+      ],
+      questions:[
+        "Are components approved before full pages get built out, or is the team designing page-by-page from scratch?",
+        "Does the designer have every asset, or does the PM need to pull in extra resourcing?",
+        "If animation is planned, has dev confirmed it won't hurt page speed — should it move to development instead?",
+        "Has someone explicitly reviewed mobile before this goes to the client?",
+        "Is the Creative Director weighing in on direction, or only seeing the final round?"
+      ]},
+    { id:"mlrDesign", num:"04", title:"MLR Review (Design)", owner:"reg", ownerLabel:"Regulatory", pharma:true, duration:"~2 weeks",
+      summary:"Design goes to MLR — design and staging have to move together if feedback lands late.",
+      who:["Regulatory/MLR reviewer","PM","Designer"],
+      whatNeeded:[
+        "Clean, submission-ready design flats",
+        "A realistic MLR review window already on the calendar"
+      ],
+      steps:[
+        "Submit design flats to MLR",
+        "MLR review period",
+        "Consolidate MLR feedback into one clean set of comments",
+        "Incorporate MLR feedback into design and route to clean",
+        "If MLR feedback arrives after staging has already started, PM coordinates updating the design files and the staging site together — not one, then the other"
+      ],
+      watchouts:[
+        "The MLR window gets compressed to protect the launch date instead of the other way around",
+        "Design and staging quietly drift out of sync after a round of MLR feedback"
+      ],
+      questions:[
+        "Is the MLR review window built into the timeline at a realistic length, not compressed to hit a launch date?",
+        "When MLR feedback lands, who owns the design update vs. the staging update — and are they happening the same day?",
+        "Is there a version-control plan so design and staging don't quietly drift apart after an MLR round?"
+      ]},
+    { id:"development", num:"05", title:"Development", owner:"dev", ownerLabel:"Dev", pharma:false, duration:"~2–3 weeks",
+      summary:"Environments, specs, and access need to be ready before a developer can move fast.",
+      who:["Developer","PM"],
+      whatNeeded:[
+        "Pantheon repository created",
+        "GitHub project/repo created",
+        "Full tech specs, including every integration needed",
+        "Dev access/credentials for every required system",
+        "Finalized CTAs for every page"
+      ],
+      steps:[
+        "PM confirms the Pantheon repository is created for the site",
+        "PM confirms a GitHub project/repo is created so dev can tie code into it",
+        "PM makes sure dev has full tech specs — which integrations are needed (forms, analytics, CRM, chat, etc.) — and confirms dev has access to build them",
+        "CTAs are identified and finalized for every page before build starts",
+        "PM runs regular check-ins with dev to track against the deadline, and steps in immediately if copy or assets are missing on any page",
+        "PM supports content migration from the old site or source files",
+        "PM ensures SEO support is delivered — meta descriptions, title tags, alt text, URL structure — for every page, not just the homepage",
+        "Dev collaborates directly with design/Creative on an ongoing basis to keep the build matching design intent"
+      ],
+      watchouts:[
+        "Dev starts building before access or specs are actually confirmed in hand",
+        "Placeholder CTAs make it all the way to launch unnoticed",
+        "SEO metadata becomes a launch-week scramble instead of being built in page by page"
+      ],
+      questions:[
+        "Are Pantheon and GitHub set up before dev's start date, not on it?",
+        "Does dev have every integration requirement and the access to implement it?",
+        "Are CTAs finalized for every page, or are there placeholders that could block launch?",
+        "Is there a standing check-in cadence with dev, or only ad hoc check-ins?",
+        "Has SEO metadata been provided for every page?"
+      ]},
+    { id:"qa", num:"06", title:"QA", owner:"qa", ownerLabel:"QA", pharma:false, duration:"~1–2 weeks",
+      summary:"Functional QA on staging — separate from the regulatory review that follows it.",
+      who:["PM","Developer","Designer","Creative Director","Account Lead","Proofreader","SEO Specialist","Digital Strategist","Content/Page Owner"],
+      whatNeeded:[
+        "A GitHub repo with an “Issue Report” template set up for the New Issue flow",
+        "Staging site access for every reviewer",
+        "Final copy decks and approved designs on hand for proofreading comparison",
+        "The tech specs document for the developer's review",
+        "CMS/back-end access for the developer",
+        "Access to the CRM / system of record to confirm form submissions land correctly",
+        "A confirmed WCAG 2.1 compliance level target"
+      ],
+      steps:[
+        "PM schedules and facilitates a QA kickoff with the full team and confirms the timeline for completion",
+        "Each reviewer logs issues in GitHub using the Issue Report template and leaves them unassigned — log a possible duplicate rather than skip it",
+        "PM/dev lead reviews and qualifies incoming issues: remove duplicates, split multi-part issues, flag anything that's really a new feature request, and ask for clarification where needed",
+        "Qualified issues get assigned out to the right executor — copy, design, dev, etc.",
+        "Developer reviews CMS functionality and usability, ADA/WCAG compliance, redirects, heading structure, sitemap/robots.txt, SEO plugin setup, and forms against the tech specs",
+        "Designer checks build accuracy against the design system across desktop, tablet, and mobile — spacing, image quality, and interactive states (hover, focus, active)",
+        "Creative Director reviews content structure and asset accuracy, and checks every link and button for functionality",
+        "Account lead / digital strategist test forms end to end — submission, confirmation messaging, field labels and required-vs-optional logic, tracking (GTM/analytics), and who gets notified",
+        "Proofreader checks the copy deck against the final design copy (not a full content-migration review)",
+        "SEO specialist runs a technical SEO audit — broken links, 404s, redirects, meta descriptions, heading structure, schema/structured data, and image optimization",
+        "PM confirms every page's CTAs are correct and sweeps for 404s",
+        "Once an issue is fixed, it's reassigned back to whoever originally reported it to verify — then the reporter closes it if resolved, or reassigns it again if not",
+        "Client reviews staging and gives revisions, if any"
+      ],
+      watchouts:[
+        "Accessibility QA is more than a plugin check — confirm the target WCAG 2.1 level, don't just assume “ADA compliant”",
+        "Schema/structured data validation can be blocked if the staging site isn't accessible for crawling — check that before relying on it",
+        "Form testing isn't done until submissions are confirmed landing in the actual CRM/system of record, not just the on-screen confirmation",
+        "A recent brand, naming, or messaging update needs a sitewide consistency pass — one page catching it doesn't mean every page did",
+        "Copy proofreading here is deck-vs-design accuracy, not a substitute for a full content-migration review",
+        "An issue isn't actually closed until the original reporter verifies the fix — don't let whoever fixed it close it themselves"
+      ],
+      questions:[
+        "Does every reviewer know to log issues in GitHub, even ones they think might be duplicates?",
+        "Is someone actively triaging incoming issues daily, or are they piling up unqualified?",
+        "Has the WCAG compliance level actually been confirmed, not just assumed?",
+        "Are form submissions verified in the real system of record, not just visually on the confirmation page?",
+        "Is there time built in for a second QA pass if round one turns up real issues?"
+      ]},
+    { id:"mlrStaging", num:"07", title:"MLR Review (Staging)", owner:"reg", ownerLabel:"Regulatory", pharma:true, duration:"~1 week",
+      summary:"A second, separate MLR round — this time on screenshots of the live build, not design flats.",
+      who:["Regulatory/MLR reviewer","Developer","PM"],
+      whatNeeded:[
+        "Screenshots pulled from the actual staging environment, not the design file",
+        "A clean, functionally-resolved staging build (after QA)"
+      ],
+      steps:[
+        "Submit the build to MLR as screenshots of the actual staging site, not the design file",
+        "MLR reviews and approves the build as built",
+        "Route any last feedback back to dev to fix on staging before sign-off"
+      ],
+      watchouts:[
+        "Screenshots get submitted from the design file instead of the live staging build",
+        "No schedule buffer exists if MLR asks for build-level changes at this stage"
+      ],
+      questions:[
+        "Are the screenshots pulled from the real staging environment, not the original design comps?",
+        "Is there time in the schedule for another round if MLR asks for build changes here too?",
+        "Who owns getting approved fixes back into staging quickly, so this doesn't stall launch?"
+      ]},
+    { id:"submission2253", num:"08", title:"2253/AFD Submission", owner:"reg", ownerLabel:"Regulatory", pharma:true, duration:"~1 week",
+      summary:"The regulatory filing that has to clear before launch can be locked in.",
+      who:["Regulatory/MLR reviewer","PM"],
+      whatNeeded:[
+        "Final MLR-approved materials",
+        "Submission lead time confirmed against the target launch date"
+      ],
+      steps:[
+        "Submit the MLR-approved materials for 2253/AFD filing, with enough lead time before the target launch date",
+        "Track submission status until it clears",
+        "File the submission and approval in the project record for reference"
+      ],
+      watchouts:[
+        "The 2253/AFD lead time gets discovered late instead of planned into the launch date from the start",
+        "No one is explicitly tracking the filing status until launch week"
+      ],
+      questions:[
+        "Is the 2253/AFD lead time already built into the launch date, or is it being squeezed in at the end?",
+        "Who is tracking the filing status, and when will the team know it's cleared?",
+        "Is the filed submission and approval saved somewhere the team can find it later?"
+      ]},
+    { id:"launch", num:"09", title:"Pre-Launch & Launch", owner:"pm", ownerLabel:"PM-led", pharma:false, duration:"~1 week",
+      summary:"Lock it down, launch it, and watch it — launch day isn't the finish line.",
+      who:["PM","Developer","QA"],
+      whatNeeded:[
+        "A signed-off pre-launch checklist",
+        "A confirmed hard-lock time communicated to the whole team"
+      ],
+      steps:[
+        "PM partners with dev on a pre-launch checklist — redirects, 404s, forms, analytics/tracking, SSL, backups",
+        "Hard lock content and code 24 hours before launch; PM communicates this to the full team",
+        "Launch day — PM ensures support coverage and live testing",
+        "Run post-launch QA immediately after go-live",
+        "Monitor post-launch (analytics, error monitoring, form submissions) for the agreed window before closing the project"
+      ],
+      watchouts:[
+        "No named owner for launch-day support or a clear escalation path if something breaks",
+        "The post-launch monitoring window is left undefined, so no one knows when the project is actually done"
+      ],
+      questions:[
+        "Has the pre-launch checklist actually been run and signed off by both PM and dev?",
+        "Has the hard-lock time been communicated to the whole team — and the client, if relevant?",
+        "Who's on call for launch-day support, and what's the escalation path if something breaks?",
+        "What are we monitoring post-launch, and for how long, before this project is considered closed?"
+      ]}
+  ];
+
+  function uid(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
+  function toItems(arr){ return arr.map(function(t){ return {id:uid(), text:t, done:false}; }); }
+  function toPlain(arr){ return arr.map(function(t){ return {id:uid(), text:t}; }); }
+
+  function defaultState(){
+    var s = {
+      context: DEFAULT_CONTEXT,
+      cadence: { ceremonies: toPlain(DEFAULT_CEREMONIES), notes: "" },
+      phases: {}
+    };
+    PHASES.forEach(function(p){
+      s.phases[p.id] = {
+        who: toPlain(p.who),
+        whatNeeded: toPlain(p.whatNeeded),
+        steps: toPlain(p.steps),
+        watchouts: toPlain(p.watchouts),
+        questions: toItems(p.questions),
+        notes: ""
+      };
+    });
+    return s;
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      var base = defaultState();
+      if(typeof parsed.context === "string") base.context = parsed.context;
+      if(parsed.cadence){
+        if(Array.isArray(parsed.cadence.ceremonies)) base.cadence.ceremonies = parsed.cadence.ceremonies;
+        if(typeof parsed.cadence.notes === "string") base.cadence.notes = parsed.cadence.notes;
+      }
+      if(parsed.phases){
+        PHASES.forEach(function(p){
+          if(parsed.phases[p.id]) base.phases[p.id] = parsed.phases[p.id];
+        });
+      }
+      return base;
+    }catch(e){ return defaultState(); }
+  }
+
+  var state = loadState();
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  var flowEl = document.getElementById("flow");
+  var ceremonyListEl = document.getElementById("ceremonyList");
+  var cadenceNotesEl = document.getElementById("cadenceNotes");
+  var ctxInput = document.getElementById("ctx");
+  var ctxDot = document.getElementById("ctxDot");
+
+  function blink(dot){
+    dot.classList.add("on");
+    clearTimeout(dot._t);
+    dot._t = setTimeout(function(){ dot.classList.remove("on"); }, 900);
+  }
+  function persist(){ saveState(); blink(ctxDot); }
+
+  function classify(text){
+    var t = text.toLowerCase();
+    if(t.indexOf("regulat")>-1 || t.indexOf("mlr")>-1) return "reg";
+    if(t.indexOf("dev")>-1) return "dev";
+    if(t.indexOf("design")>-1 || t.indexOf("creative")>-1) return "design";
+    if(t.indexOf("qa")>-1) return "qa";
+    return "pm";
+  }
+
+  function mkEditSpan(text, onCommit){
+    var span = document.createElement("span");
+    span.className = "edit"; span.contentEditable = "true";
+    span.textContent = text;
+    span.addEventListener("blur", function(){ onCommit(span.textContent.trim()); });
+    return span;
+  }
+  function mkDel(onClick, title){
+    var b = document.createElement("button");
+    b.className="del"; b.textContent="×"; b.title=title||"Remove";
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  // ---------- render: cadence ----------
+  function renderCadence(){
+    ceremonyListEl.innerHTML = "";
+    state.cadence.ceremonies.forEach(function(item){
+      var li = document.createElement("li");
+      var dash = document.createElement("span"); dash.className="dash"; dash.textContent="—";
+      var span = mkEditSpan(item.text, function(v){ item.text=v; persist(); });
+      span.style.fontFamily = "'IBM Plex Sans',sans-serif"; span.style.fontSize="13.5px";
+      li.appendChild(dash); li.appendChild(span);
+      li.appendChild(mkDel(function(){
+        state.cadence.ceremonies = state.cadence.ceremonies.filter(function(x){return x.id!==item.id;});
+        renderCadence(); persist();
+      }));
+      ceremonyListEl.appendChild(li);
+    });
+    cadenceNotesEl.value = state.cadence.notes || "";
+  }
+  document.getElementById("addCeremony").addEventListener("click", function(){
+    state.cadence.ceremonies.push({id:uid(), text:"New ceremony — frequency — who — why"});
+    renderCadence(); persist();
+  });
+  cadenceNotesEl.addEventListener("input", function(){
+    clearTimeout(cadenceNotesEl._t);
+    cadenceNotesEl._t = setTimeout(function(){ state.cadence.notes = cadenceNotesEl.value; persist(); }, 500);
+  });
+
+  // ---------- render: phases ----------
+  function renderList(container, tag, items, opts){
+    // opts: {numbered, checkable, dashPrefix, extraClass, onAdd (label), onChangeArr}
+    container.innerHTML = "";
+    items.forEach(function(item){
+      var li = document.createElement("li");
+      if(opts.checkable){
+        if(item.done) li.className="done";
+        var cb = document.createElement("input"); cb.type="checkbox"; cb.checked=!!item.done;
+        cb.addEventListener("change", function(){ item.done=cb.checked; renderList(container,tag,items,opts); persist(); });
+        li.appendChild(cb);
+      } else if(opts.dashPrefix){
+        var mark = document.createElement("span"); mark.className="mark"; mark.textContent = opts.markChar || "—";
+        li.appendChild(mark);
+      }
+      var span = mkEditSpan(item.text, function(v){ item.text=v; persist(); });
+      li.appendChild(span);
+      li.appendChild(mkDel(function(){
+        opts.onChangeArr(items.filter(function(x){return x.id!==item.id;}));
+        persist();
+      }));
+      container.appendChild(li);
+    });
+  }
+
+  function renderPhase(id){
+    var meta = PHASES.filter(function(p){return p.id===id;})[0];
+    var data = state.phases[id];
+    var existing = document.getElementById("card-"+id);
+    var wasOpen = existing ? existing.querySelector("details").open : (id === PHASES[0].id);
+    var row = document.createElement("div");
+    row.className = "phase-row" + (meta.pharma ? " pharma-flag" : "");
+    row.id = "card-"+id;
+
+    var rail = document.createElement("div"); rail.className="rail";
+    var dot = document.createElement("div"); dot.className="dot"; dot.textContent = meta.num;
+    var line = document.createElement("div"); line.className="line";
+    rail.appendChild(dot); rail.appendChild(line);
+
+    var details = document.createElement("details"); details.className="card"; details.open = wasOpen;
+    var summary = document.createElement("summary");
+    summary.innerHTML =
+      '<span class="chip '+meta.owner+'">'+meta.ownerLabel+'</span>' +
+      '<span class="title">'+meta.title+'</span>' +
+      '<span class="duration mono">'+meta.duration+'</span>' +
+      (meta.pharma ? '<span class="pharma-badge">PHARMA-SPECIFIC</span>' : '') +
+      '<span class="chev">▸</span>' +
+      '<span class="summary-line">'+meta.summary+'</span>';
+    details.appendChild(summary);
+
+    var body = document.createElement("div"); body.className="card-body";
+
+    // Who's needed
+    var h3w = document.createElement("h3"); h3w.textContent="Who's needed";
+    var whoRow = document.createElement("div"); whoRow.className="chip-row";
+    function renderWho(){
+      whoRow.innerHTML = "";
+      data.who.forEach(function(item){
+        var chip = document.createElement("span"); chip.className="chip removable "+classify(item.text);
+        var span = mkEditSpan(item.text, function(v){ item.text=v; persist(); });
+        span.style.color="inherit";
+        chip.appendChild(span);
+        var x = document.createElement("span"); x.className="x"; x.textContent="×";
+        x.addEventListener("click", function(){
+          data.who = data.who.filter(function(i){return i.id!==item.id;});
+          renderWho(); persist();
+        });
+        chip.appendChild(x);
+        whoRow.appendChild(chip);
+      });
+    }
+    renderWho();
+    body.appendChild(h3w); body.appendChild(whoRow);
+    var addWho = document.createElement("button"); addWho.className="add-row"; addWho.textContent="+ add a role";
+    addWho.addEventListener("click", function(){
+      data.who.push({id:uid(), text:"Role"});
+      renderWho(); persist();
+    });
+    body.appendChild(addWho);
+
+    // What's needed
+    var h3n2 = document.createElement("h3"); h3n2.textContent="What's needed";
+    var ulNeed = document.createElement("ul"); ulNeed.className="bullets need";
+    body.appendChild(h3n2); body.appendChild(ulNeed);
+    var addNeed = document.createElement("button"); addNeed.className="add-row"; addNeed.textContent="+ add an item";
+    addNeed.addEventListener("click", function(){
+      data.whatNeeded.push({id:uid(), text:"New item"});
+      rerenderNeed(); persist();
+    });
+    body.appendChild(addNeed);
+    function rerenderNeed(){
+      renderList(ulNeed, "li", data.whatNeeded, {dashPrefix:true, markChar:"—", onChangeArr:function(a){ data.whatNeeded=a; rerenderNeed(); }});
+    }
+    rerenderNeed();
+
+    // Process steps
+    var h3s = document.createElement("h3"); h3s.textContent="Process steps";
+    var ol = document.createElement("ol"); ol.className="steps";
+    function rerenderSteps(){
+      renderList(ol, "li", data.steps, {onChangeArr:function(a){ data.steps=a; rerenderSteps(); }});
+    }
+    rerenderSteps();
+    body.appendChild(h3s); body.appendChild(ol);
+    var addStep = document.createElement("button"); addStep.className="add-row"; addStep.textContent="+ add a step";
+    addStep.addEventListener("click", function(){
+      data.steps.push({id:uid(), text:"New step"});
+      rerenderSteps(); persist();
+      focusLast(id, "ol.steps span.edit");
+    });
+    body.appendChild(addStep);
+
+    // Watch-outs
+    var h3wo = document.createElement("h3"); h3wo.textContent="Watch-outs";
+    var ulWatch = document.createElement("ul"); ulWatch.className="bullets watch";
+    function rerenderWatch(){
+      renderList(ulWatch, "li", data.watchouts, {dashPrefix:true, markChar:"⚑", onChangeArr:function(a){ data.watchouts=a; rerenderWatch(); }});
+    }
+    rerenderWatch();
+    body.appendChild(h3wo); body.appendChild(ulWatch);
+    var addWatch = document.createElement("button"); addWatch.className="add-row"; addWatch.textContent="+ add a watch-out";
+    addWatch.addEventListener("click", function(){
+      data.watchouts.push({id:uid(), text:"New watch-out"});
+      rerenderWatch(); persist();
+    });
+    body.appendChild(addWatch);
+
+    // Questions to ask
+    var h3q = document.createElement("h3"); h3q.textContent="Questions to ask";
+    var ul = document.createElement("ul"); ul.className="questions";
+    data.questions.forEach(function(item){
+      var li = document.createElement("li"); if(item.done) li.className="done";
+      var cb = document.createElement("input"); cb.type="checkbox"; cb.checked=!!item.done;
+      cb.addEventListener("change", function(){ item.done = cb.checked; renderPhase(id); persist(); });
+      var span = mkEditSpan(item.text, function(v){ item.text=v; persist(); });
+      li.appendChild(cb); li.appendChild(span);
+      li.appendChild(mkDel(function(){
+        data.questions = data.questions.filter(function(x){return x.id!==item.id;});
+        renderPhase(id); persist();
+      }, "Remove question"));
+      ul.appendChild(li);
+    });
+    body.appendChild(h3q); body.appendChild(ul);
+    var addQ = document.createElement("button"); addQ.className="add-row"; addQ.textContent="+ add a question";
+    addQ.addEventListener("click", function(){
+      data.questions.push({id:uid(), text:"New question", done:false});
+      renderPhase(id); persist();
+      focusLast(id, "ul.questions span.edit");
+    });
+    body.appendChild(addQ);
+
+    // Notes
+    var h3note = document.createElement("h3"); h3note.textContent="Notes";
+    var ta = document.createElement("textarea"); ta.className="notes"; ta.value=data.notes||"";
+    ta.placeholder = "Anything specific to this project for this phase…";
+    ta.addEventListener("input", function(){
+      clearTimeout(ta._t);
+      ta._t = setTimeout(function(){ data.notes = ta.value; persist(); }, 500);
+    });
+    body.appendChild(h3note); body.appendChild(ta);
+
+    // Foot
+    var foot = document.createElement("div"); foot.className="card-foot";
+    var spacer = document.createElement("span"); foot.appendChild(spacer);
+    var reset = document.createElement("button"); reset.className="reset-btn"; reset.textContent="↺ reset to template";
+    reset.dataset.armed = "0";
+    reset.addEventListener("click", function(){
+      if(reset.dataset.armed==="1"){
+        state.phases[id] = {
+          who: toPlain(meta.who), whatNeeded: toPlain(meta.whatNeeded), steps: toPlain(meta.steps),
+          watchouts: toPlain(meta.watchouts), questions: toItems(meta.questions), notes:""
+        };
+        renderPhase(id); persist();
+      } else {
+        reset.dataset.armed="1"; reset.textContent="click again to confirm";
+        setTimeout(function(){ reset.dataset.armed="0"; reset.textContent="↺ reset to template"; }, 3000);
+      }
+    });
+    foot.appendChild(reset);
+    body.appendChild(foot);
+
+    details.appendChild(body);
+    row.appendChild(rail); row.appendChild(details);
+    if(existing){ existing.replaceWith(row); } else { flowEl.appendChild(row); }
+  }
+
+  function focusLast(id, sel){
+    setTimeout(function(){
+      var card = document.getElementById("card-"+id);
+      if(!card) return;
+      var nodes = card.querySelectorAll(sel);
+      var last = nodes[nodes.length-1];
+      if(last){
+        var range = document.createRange(); range.selectNodeContents(last); range.collapse(false);
+        var sel2 = window.getSelection(); sel2.removeAllRanges(); sel2.addRange(range);
+        last.focus();
+      }
+    }, 0);
+  }
+
+  function renderAll(){
+    PHASES.forEach(function(p){ renderPhase(p.id); });
+    renderCadence();
+  }
+  renderAll();
+
+  // ---------- context field ----------
+  ctxInput.value = state.context;
+  ctxInput.addEventListener("blur", function(){
+    state.context = ctxInput.value.trim(); persist();
+  });
+
+  // ---------- expand / collapse ----------
+  document.getElementById("expandAll").addEventListener("click", function(){
+    document.querySelectorAll("details.card").forEach(function(d){ d.open = true; });
+  });
+  document.getElementById("collapseAll").addEventListener("click", function(){
+    document.querySelectorAll("details.card").forEach(function(d){ d.open = false; });
+  });
+
+  // ---------- reset all ----------
+  document.getElementById("resetAllBtn").addEventListener("click", function(){
+    if(window.confirm ? confirm("Reset every phase, the cadence list, and the project field back to the template? This clears everything saved in this browser.") : true){
+      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+      state = defaultState();
+      ctxInput.value = state.context;
+      renderAll();
+    }
+  });
+
+  // ---------- diagram → accordion interactivity ----------
+  function openPhase(id){
+    var card = document.getElementById("card-"+id);
+    if(!card) return;
+    var det = card.querySelector("details");
+    det.open = true;
+    card.scrollIntoView({behavior:"smooth", block:"center"});
+    det.classList.add("flash");
+    setTimeout(function(){ det.classList.remove("flash"); }, 1400);
+  }
+  document.querySelectorAll(".flow-node").forEach(function(node){
+    node.addEventListener("click", function(){ openPhase(node.getAttribute("data-phase")); });
+    node.addEventListener("keydown", function(e){
+      if(e.key==="Enter" || e.key===" "){ e.preventDefault(); openPhase(node.getAttribute("data-phase")); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
